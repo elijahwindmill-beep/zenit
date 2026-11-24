@@ -191,7 +191,12 @@ On a Mac with Deno instead of Node: `deno install`, then `deno run -A node_modul
 
 ### Optional: MapTiler key
 
-MapTiler satellite imagery needs your own key from https://cloud.maptiler.com. Pick "MapTiler Satellite" under Satellite in the app and paste the key; it is stored only in your browser. For local development you can instead put it in a file called `.env.local`:
+One key from https://cloud.maptiler.com does two things, and neither is required:
+
+- **3D buildings with better heights.** The "3D buildings" layer works with no key: it uses the free OpenFreeMap tiles the base map already loads. Those only know the heights OpenStreetMap has, so in alpine villages nearly every building gets the 5 m default (Ortisei: 476 of 477). With a MapTiler key, zoom 15 and closer use MapTiler's Buildings tiles instead, which have a real height for about half of them. Paste the key in the field under "3D buildings". If MapTiler turns the key down, the free data stays on.
+- **MapTiler satellite imagery.** Pick "MapTiler Satellite" under Satellite and paste the key there (it is the same key and the same setting).
+
+The key is stored only in your browser. For local development you can instead put it in a file called `.env.local`:
 
 ```
 VITE_MAPTILER_KEY=your-key-here
@@ -217,7 +222,8 @@ Zenit is made for monetised videos, so each source's commercial terms matter. Th
 |---|---|---|---|
 | [Mapterhorn](https://mapterhorn.com/attribution) terrain tiles | Detailed elevation (default): 3D terrain, shadows, contours, hillshade. Sources include South Tyrol DGM 2.5 m (CC0), BEV Austria 1 m (CC BY 4.0), swisstopo, Trentino, Copernicus GLO-30 | Open data from each producer, attribution required ([full list](https://mapterhorn.com/attribution)) | Yes, with attribution |
 | [Mapzen Terrain Tiles](https://registry.opendata.aws/terrain-tiles/) (Terrarium, AWS Open Data) | Standard elevation (fallback choice) | Mixed open licences, [attribution required](https://github.com/tilezen/joerd/blob/master/docs/attribution.md) | Yes |
-| [OpenFreeMap](https://openfreemap.org) (OpenMapTiles schema) | Water, roads, lifts, names | © OpenStreetMap contributors (ODbL), © OpenMapTiles | Yes |
+| [OpenFreeMap](https://openfreemap.org) (OpenMapTiles schema) | Water, roads, lifts, names; 3D buildings (no key) | © OpenStreetMap contributors (ODbL), © OpenMapTiles | Yes |
+| [MapTiler Buildings](https://www.maptiler.com/copyright/) | Better heights for the 3D buildings from zoom 15 in (your key) | © MapTiler © OpenStreetMap contributors; your MapTiler plan | Depends on plan |
 | [Nominatim](https://operations.osmfoundation.org/policies/nominatim/) | Place search | ODbL data; max 1 request per second | Yes (light use) |
 | [Wikimedia Commons](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia) | Photo spots | Each photo has its own free licence (mostly CC BY / BY-SA), shown and linked with the photo; credit the author when you reuse one | Yes, with credit (and share-alike where the licence says so) |
 | [MET Norway Locationforecast](https://api.met.no/) | Weather forecast at the pin | Data from The Norwegian Meteorological Institute, [CC BY 4.0](https://api.met.no/doc/License) | Yes, with attribution |
@@ -232,7 +238,7 @@ Sun position uses NOAA's solar calculator (accurate to about 0.01°). Sunrise an
 
 Shadows are computed from the elevation data: for every ground point Zenit walks toward the sun and checks whether terrain rises above it, including mountains up to 12 km away and the curvature of the earth. Edges are softened by the width of the sun's disk.
 
-Terrain detail depends on the region. With the default detailed elevation (Mapterhorn), South Tyrol is 2.5 m (the province's DGM, CC0), Austria 1 m, Switzerland and several Italian regions 0.5 to 5 m, and the rest of the world 30 m (Copernicus). That's enough for towers, gullies and small ridges, not for single trees or buildings (the optional Google 3D tiles show those, but their shadows aren't computed: the painted shadows come from the terrain). South Tyrol's own 0.5 m LiDAR is only published as pre-lit pictures, so 2.5 m is the finest usable there without running a tile server. Its 20 cm 2023 aerial photos are available as an imagery choice.
+Terrain detail depends on the region. With the default detailed elevation (Mapterhorn), South Tyrol is 2.5 m (the province's DGM, CC0), Austria 1 m, Switzerland and several Italian regions 0.5 to 5 m, and the rest of the world 30 m (Copernicus). That's enough for towers, gullies and small ridges, not for single trees or buildings. Buildings are drawn in 3D on top (the "3D buildings" layer, lit from the sun's direction) and the optional Google 3D tiles show trees too, but neither casts a shadow: the painted shadows come from the terrain. South Tyrol's own 0.5 m LiDAR is only published as pre-lit pictures, so 2.5 m is the finest usable there without running a tile server. Its 20 cm 2023 aerial photos are available as an imagery choice.
 
 Fonts: Barlow and Barlow Condensed (SIL Open Font License), loaded from Google Fonts. The logo lettering is drawn in SVG, not a font.
 

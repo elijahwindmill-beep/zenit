@@ -9,6 +9,7 @@ import {
   type ElevationProvider,
   type ImageryProvider,
 } from './sources';
+import { freeBuildingsLayer } from './buildingStyle';
 
 export type BaseLayer = 'satellite' | 'paper' | 'terrain';
 export interface Overlays {
@@ -33,6 +34,8 @@ export interface Overlays {
   sunHours: boolean;
   /** Google Photorealistic 3D Tiles with the viewer's own key (map/google3d.ts). Hides the terrain it covers. */
   google3d: boolean;
+  /** Extruded buildings on the terrain, lit from the sun's direction (map/buildings.ts). */
+  buildings: boolean;
 }
 
 // Paper tokens from the brief / mockup A.
@@ -276,6 +279,14 @@ export function buildStyle(opts: {
       filter: ['>', ['get', 'level'], 0],
       layout: vis('contour-major'),
       paint: { 'line-color': PAPER.contourMajor, 'line-width': 1.1 },
+    },
+    // 3D buildings (map/buildings.ts switches them). In the style from the start and never
+    // layout-hidden: MapLibre cuts its zoomed-in tiles (past the source's zoom 14) from the
+    // data layers in use when a tile first loads, so a layer added or un-hidden later would
+    // find no buildings in them. Off is opacity 0 instead.
+    {
+      ...freeBuildingsLayer(base, false),
+      paint: { ...freeBuildingsLayer(base, false).paint, 'fill-extrusion-opacity': overlays.buildings ? 1 : 0 },
     },
     {
       id: 'contour-label',

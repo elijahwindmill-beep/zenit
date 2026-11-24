@@ -13,6 +13,7 @@ import { readCamera } from './camera';
 import { setMap } from './mapInstance';
 import { installShadowLayer } from './shadowLayer';
 import { installGoogle3d } from './google3d';
+import { installBuildings } from './buildings';
 import { installSteadyCamera } from './steadyCamera';
 import { installStandView } from './standView';
 import { useStand } from '../store/stand';
@@ -173,6 +174,7 @@ export function MapView() {
     let removeLens = () => {};
     let removeSpots = () => {};
     let removeGoogle = () => {};
+    let removeBuildings = () => {};
     let removeSteady = () => {};
     map.once('load', () => {
       // Steady camera: off until it works with MapLibre's drag and scroll gestures.
@@ -182,6 +184,8 @@ export function MapView() {
       removeLight = installLightColour(map, 'contour-label');
       // Google 3D tiles (optional): under the golden-hour colour, so they take it too.
       removeGoogle = installGoogle3d(map, 'light-colour');
+      // 3D buildings: under the golden-hour colour too.
+      removeBuildings = installBuildings(map, 'light-colour');
       // Above the light colour and contours, under the labels: routes keep their own colours.
       removeUser = installUserLayers(map, 'contour-label');
       removeSpots = installPhotoSpots(map, 'contour-label');
@@ -259,6 +263,7 @@ export function MapView() {
       removeLens();
       removeSpots();
       removeGoogle();
+      removeBuildings();
       removeSteady();
       removeControls();
       cancelAnimationFrame(raf);

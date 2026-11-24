@@ -7,6 +7,7 @@ import { MyLayers } from './MyLayers';
 import { SearchBar } from './SearchBar';
 import { useSpots } from '../store/spots';
 import { useSunHours } from '../store/sunHours';
+import { useBuildings } from '../store/buildings';
 import { HOURS_STOPS } from '../terrain/sunHours';
 import { Logo } from './Logo';
 import { Settings } from './Settings';
@@ -22,6 +23,7 @@ const BASES: Array<{ id: BaseLayer; label: string }> = [
 const OVERLAYS: Array<{ id: keyof Overlays; label: string; swatch: string }> = [
   { id: 'shadows', label: 'Cast shadows', swatch: '#3B4A5A' },
   { id: 'sunHours', label: 'Sun hours (whole day)', swatch: 'linear-gradient(90deg, #1b2a4a, #3fa7a0, #f5c542, #ff8a3d)' },
+  { id: 'buildings', label: '3D buildings', swatch: '#DAD3C2' },
   { id: 'routes', label: 'Routes', swatch: '#5B8DEF' },
   { id: 'places', label: 'Places', swatch: '#1F1D1A' },
   { id: 'photos', label: 'Photos', swatch: '#C98A0F' },
@@ -47,6 +49,7 @@ export function LayerPanel() {
   const sunSceneSize = useApp((s) => s.sunSceneSize);
   const spotStatus = useSpots((s) => s.status);
   const hours = useSunHours();
+  const buildings = useBuildings();
   const status = useApp((s) => s.shadowStatus);
   const { setBase, toggleOverlay, setImagery, setMaptilerKey, setAboutOpen } = useApp.getState();
   const provider = IMAGERY[imagery];
@@ -99,6 +102,7 @@ export function LayerPanel() {
             <label className="field">
               <span className="eyebrow">MapTiler key</span>
               <input
+                key={maptilerKey}
                 type="password"
                 autoComplete="off"
                 spellCheck={false}
@@ -142,6 +146,33 @@ export function LayerPanel() {
           <p className="spot-status" role="status">
             {hours.state === 'working' ? `Adding up the day's sun… ${Math.round(hours.progress * 100)}%` : `Direct sun on the viewed day, up to ${hours.max.toFixed(1)} h here. Replaces cast shadows while on.`}
           </p>
+        </div>
+      )}
+
+      {overlays.buildings && (
+        <div className="buildings-settings">
+          <p className={`spot-status${buildings.problem ? ' shadow-status-error' : ''}`} role="status">
+            {buildings.problem ||
+              (buildings.source === 'maptiler'
+                ? 'Zoom in to see them. Heights come from MapTiler (your key) from zoom 15 in. Buildings are lit from the sun but cast no shadows: those come from the terrain.'
+                : 'Zoom in to see them. Free OpenStreetMap shapes: where no height is mapped they stand 5 m tall. A MapTiler key gives real heights for many more. Buildings are lit from the sun but cast no shadows.')}
+          </p>
+          {/* The same key as MapTiler Satellite; that field shows instead when it's on screen. */}
+          {!(base === 'satellite' && provider.needsKey) && (
+            <label className="field">
+              <span className="eyebrow">MapTiler key (optional)</span>
+              <input
+                key={maptilerKey}
+                type="password"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder="Paste your key"
+                defaultValue={maptilerKey}
+                onBlur={(e) => setMaptilerKey(e.target.value.trim())}
+                onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+              />
+            </label>
+          )}
         </div>
       )}
 
