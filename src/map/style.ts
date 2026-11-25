@@ -9,7 +9,7 @@ import {
   type ElevationProvider,
   type ImageryProvider,
 } from './sources';
-import { freeBuildingsLayer } from './buildingStyle';
+import { freeBuildingLayers } from './buildingStyle';
 
 export type BaseLayer = 'satellite' | 'paper' | 'terrain';
 export interface Overlays {
@@ -284,10 +284,7 @@ export function buildStyle(opts: {
     // layout-hidden: MapLibre cuts its zoomed-in tiles (past the source's zoom 14) from the
     // data layers in use when a tile first loads, so a layer added or un-hidden later would
     // find no buildings in them. Off is opacity 0 instead.
-    {
-      ...freeBuildingsLayer(base, false),
-      paint: { ...freeBuildingsLayer(base, false).paint, 'fill-extrusion-opacity': overlays.buildings ? 1 : 0 },
-    },
+    ...freeBuildingLayers(base, false).map((l) => ({ ...l, paint: { ...l.paint, 'fill-extrusion-opacity': overlays.buildings ? 1 : 0 } })),
     {
       id: 'contour-label',
       type: 'symbol',

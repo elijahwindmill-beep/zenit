@@ -4,13 +4,13 @@ import { useBuildings } from '../store/buildings';
 import { sunPosition } from '../sun/position';
 import { maptilerBuildingsUrl } from './sources';
 import {
-  BUILDINGS_FREE,
-  BUILDINGS_MAPTILER,
   BUILDINGS_MINZOOM,
+  FREE_LAYERS,
   MAPTILER_BUILDINGS_SOURCE,
   MAPTILER_HEIGHT_ZOOM,
+  MAPTILER_LAYERS,
   buildingColour,
-  maptilerBuildingsLayer,
+  maptilerBuildingLayers,
   sunLight,
 } from './buildingStyle';
 
@@ -23,6 +23,10 @@ import {
  * Buildings tiles instead, which have a real height for about half of them. If MapTiler
  * turns the key down, the free data stays on at every zoom.
  *
+ * Walls and roof are separate layers (map/buildingStyle.ts): a building's own colours where
+ * OpenStreetMap has them (rare in the Alps, common in big cities), light walls and a darker
+ * roof everywhere else.
+ *
  * Buildings don't cast shadows: map/shadowLayer.ts works from the terrain alone.
  */
 export function installBuildings(map: MlMap, beforeLayer: string): () => void {
@@ -32,7 +36,7 @@ export function installBuildings(map: MlMap, beforeLayer: string): () => void {
   let refusedKey: string | null = null;
 
   const removeMaptiler = () => {
-    if (map.getLayer(BUILDINGS_MAPTILER)) map.removeLayer(BUILDINGS_MAPTILER);
+    for (const id of MAPTILER_LAYERS) if (map.getLayer(id)) map.removeLayer(id);
     if (map.getSource(MAPTILER_BUILDINGS_SOURCE)) map.removeSource(MAPTILER_BUILDINGS_SOURCE);
     activeKey = null;
   };
@@ -48,19 +52,21 @@ export function installBuildings(map: MlMap, beforeLayer: string): () => void {
       removeMaptiler();
       if (wantKey) {
         map.addSource(MAPTILER_BUILDINGS_SOURCE, { type: 'vector', url: maptilerBuildingsUrl(wantKey) });
-        // Added together with its source, before any of its tiles load, and removed (not
-        // hidden) when off, so it never meets the zoomed-in tile problem the free layer has.
-        map.addLayer(maptilerBuildingsLayer(s.base), beforeLayer);
+        // Added together with their source, before any of its tiles load, and removed (not
+        // hidden) when off, so they never meet the zoomed-in tile problem the free layers have.
+        for (const l of maptilerBuildingLayers(s.base)) map.addLayer(l, beforeLayer);
         activeKey = wantKey;
       }
     }
-    // The free layer is part of the style (map/style.ts) and is switched by opacity, never by
-    // visibility or by adding it here: see the note on it there.
+    // The free layers are part of the style (map/style.ts) and are switched by opacity, never
+    // by visibility or by adding them here: see the note on them there.
     const freeMax = activeKey ? MAPTILER_HEIGHT_ZOOM : 24;
-    if (map.getLayer(BUILDINGS_FREE)?.maxzoom !== freeMax) map.setLayerZoomRange(BUILDINGS_FREE, BUILDINGS_MINZOOM, freeMax);
-    map.setPaintProperty(BUILDINGS_FREE, 'fill-extrusion-opacity', show ? 1 : 0);
-    for (const id of [BUILDINGS_FREE, BUILDINGS_MAPTILER]) {
-      if (map.getLayer(id)) map.setPaintProperty(id, 'fill-extrusion-color', buildingColour(s.base));
+    for (const id of FREE_LAYERS) {
+      if (map.getLayer(id)?.maxzoom !== freeMax) map.setLayerZoomRange(id, BUILDINGS_MINZOOM, freeMax);
+      map.setPaintProperty(id, 'fill-extrusion-opacity', show ? 1 : 0);
+    }
+    for (const id of [...FREE_LAYERS, ...MAPTILER_LAYERS]) {
+      if (map.getLayer(id)) map.setPaintProperty(id, 'fill-extrusion-color', buildingColour(id, s.base));
     }
     if (show) light();
     useBuildings.setState({

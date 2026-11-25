@@ -47,12 +47,15 @@ describe('base layers', () => {
     const opts = { base: 'paper' as const, imagery: IMAGERY.esri, imageryKey: '', elevation: ELEVATION.mapterhorn, contourTilesUrl: 'dem-contour://{z}/{x}/{y}' };
     for (const on of [true, false]) {
       const layers = buildStyle({ ...opts, overlays: { ...all, buildings: on } }).layers;
-      const b = layers.find((l) => l.id === 'buildings-3d') as { layout?: { visibility?: string }; paint: Record<string, unknown> };
-      expect(b.layout?.visibility).not.toBe('none');
-      expect(b.paint['fill-extrusion-opacity']).toBe(on ? 1 : 0);
-      // Under the labels, above the contour lines.
+      for (const id of ['buildings-3d', 'buildings-3d-roof']) {
+        const b = layers.find((l) => l.id === id) as { layout?: { visibility?: string }; paint: Record<string, unknown> };
+        expect(b.layout?.visibility).not.toBe('none');
+        expect(b.paint['fill-extrusion-opacity']).toBe(on ? 1 : 0);
+      }
+      // Walls then roof, under the labels and above the contour lines.
       const ids = layers.map((l) => l.id);
-      expect(ids.indexOf('buildings-3d')).toBe(ids.indexOf('contour-label') - 1);
+      expect(ids.indexOf('buildings-3d')).toBe(ids.indexOf('contour-label') - 2);
+      expect(ids.indexOf('buildings-3d-roof')).toBe(ids.indexOf('contour-label') - 1);
     }
   });
 

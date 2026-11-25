@@ -194,6 +194,7 @@ On a Mac with Deno instead of Node: `deno install`, then `deno run -A node_modul
 One key from https://cloud.maptiler.com does two things, and neither is required:
 
 - **3D buildings with better heights.** The "3D buildings" layer works with no key: it uses the free OpenFreeMap tiles the base map already loads. Those only know the heights OpenStreetMap has, so in alpine villages nearly every building gets the 5 m default (Ortisei: 476 of 477). With a MapTiler key, zoom 15 and closer use MapTiler's Buildings tiles instead, which have a real height for about half of them. Paste the key in the field under "3D buildings". If MapTiler turns the key down, the free data stays on.
+  Either way buildings are drawn with walls and a roof in separate colours. Where OpenStreetMap has a building's own colours they are used: the wall colour in the free data, wall and roof colour with the key. That is rare in the Alps (0 to 7% of buildings) and common in big cities (30 to 42%). Everywhere else walls are light plaster and roofs tile-brown, or grey when the roof is mapped as flat or the building is over 25 m.
 - **MapTiler satellite imagery.** Pick "MapTiler Satellite" under Satellite and paste the key there (it is the same key and the same setting).
 
 The key is stored only in your browser. For local development you can instead put it in a file called `.env.local`:
