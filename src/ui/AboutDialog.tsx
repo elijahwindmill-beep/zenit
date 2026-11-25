@@ -19,8 +19,8 @@ export function AboutDialog() {
     <dialog ref={ref} className="panel about" onClose={() => useApp.getState().setAboutOpen(false)}>
       <h2 className="title">About Zenit</h2>
       <p>
-        Scout sun and shadow on real terrain, then turn it into keyframed clips. Terrain only: buildings and trees are not
-        modelled.
+        Scout sun and shadow on real terrain, then turn it into keyframed clips. Shadows come from the terrain only: buildings
+        show in 3D but don't cast shadows, and trees are not modelled.
       </p>
 
       <h3 className="eyebrow">Data sources</h3>

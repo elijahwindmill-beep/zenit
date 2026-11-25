@@ -99,6 +99,7 @@ const DEFAULT_OVERLAYS: Overlays = {
   photoSpots: true,
   sunHours: false,
   google3d: false,
+  buildings: true,
 };
 
 export const useApp = create<AppState>()(

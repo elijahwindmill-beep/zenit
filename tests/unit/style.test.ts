@@ -3,7 +3,7 @@ import { buildStyle, layerVisibility } from '../../src/map/style';
 import { ELEVATION, IMAGERY } from '../../src/map/sources';
 
 describe('base layers', () => {
-  const all = { shadows: true, sunPath: true, solstices: true, compass: true, contours: true, labels: true, lightColour: true, routes: true, places: true, photos: true, lens: true, photoSpots: true, sunHours: false, google3d: false };
+  const all = { shadows: true, sunPath: true, solstices: true, compass: true, contours: true, labels: true, lightColour: true, routes: true, places: true, photos: true, lens: true, photoSpots: true, sunHours: false, google3d: false, buildings: true };
 
   it('shows exactly one base at a time', () => {
     const sat = layerVisibility('satellite', all);
@@ -41,6 +41,19 @@ describe('base layers', () => {
     const ids = style.layers.map((l) => l.id);
     // The shadow layers and 'sun-hours' are added at runtime once elevation loads.
     for (const id of Object.keys(layerVisibility('paper', all))) if (!['shadows', 'shadows-detail', 'sun-hours'].includes(id)) expect(ids).toContain(id);
+  });
+
+  it('has the 3D buildings in the style from the start, switched by opacity and never hidden', () => {
+    const opts = { base: 'paper' as const, imagery: IMAGERY.esri, imageryKey: '', elevation: ELEVATION.mapterhorn, contourTilesUrl: 'dem-contour://{z}/{x}/{y}' };
+    for (const on of [true, false]) {
+      const layers = buildStyle({ ...opts, overlays: { ...all, buildings: on } }).layers;
+      const b = layers.find((l) => l.id === 'buildings-3d') as { layout?: { visibility?: string }; paint: Record<string, unknown> };
+      expect(b.layout?.visibility).not.toBe('none');
+      expect(b.paint['fill-extrusion-opacity']).toBe(on ? 1 : 0);
+      // Under the labels, above the contour lines.
+      const ids = layers.map((l) => l.id);
+      expect(ids.indexOf('buildings-3d')).toBe(ids.indexOf('contour-label') - 1);
+    }
   });
 
   it('never puts a MapTiler key in the style unless one is given', () => {

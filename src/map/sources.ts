@@ -139,6 +139,10 @@ export const IMAGERY: Record<ImageryId, ImageryProvider> = {
 
 export const IMAGERY_ORDER: ImageryId[] = ['esri', 'southtyrol', 'eox', 'maptiler'];
 
+/** MapTiler's Buildings tiles (outlines from zoom 12, heights from 15), with the viewer's own key. */
+export const maptilerBuildingsUrl = (key: string) =>
+  `https://api.maptiler.com/tiles/buildings/tiles.json?key=${encodeURIComponent(key)}`;
+
 /** Everything that is not imagery, for the About panel and README. */
 export const DATA_SOURCES = [
   {
@@ -155,9 +159,15 @@ export const DATA_SOURCES = [
   },
   {
     name: 'OpenFreeMap (OpenMapTiles schema)',
-    use: 'Water, roads, lifts, peak and place names on Paper and Terrain',
+    use: 'Water, roads, lifts, peak and place names on Paper and Terrain; 3D buildings (no key needed)',
     licence: 'Map data © OpenStreetMap contributors (ODbL), © OpenMapTiles; free incl. commercial',
     url: 'https://openfreemap.org',
+  },
+  {
+    name: 'MapTiler Buildings (optional, your key)',
+    use: 'Better building heights for the 3D buildings from zoom 15 in, when a MapTiler key is set',
+    licence: '© MapTiler © OpenStreetMap contributors; commercial use depends on your MapTiler plan',
+    url: 'https://www.maptiler.com/copyright/',
   },
   {
     name: 'MET Norway Locationforecast',
